@@ -1,0 +1,20 @@
+[Unit]
+Description=Brain Chroma Server (single owner of the vector index)
+After=network.target
+
+[Service]
+Type=simple
+User=daniel
+WorkingDirectory=/home/daniel/brain-server
+# 2026-11-02: indexer + mcp_server each opened the index in-process (2 x 5.4 GB).
+# This one server now holds it; both talk to it on localhost only.
+ExecStart=/home/daniel/brain-server/venv/bin/chroma run --path /home/daniel/.local/share/chroma --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=10
+# Index is ~5.4 GB on disk but the server settles at ~8 GB. No MemoryHigh: squeezing it
+# into swap is what it was doing when it crashed on 2026-11-02 17:59 (see DECISIONS).
+# MemoryMax kills only this cgroup, never the whole box.
+MemoryMax=10G
+
+[Install]
+WantedBy=multi-user.target

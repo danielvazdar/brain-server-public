@@ -1,0 +1,43 @@
+# Rootless Docker for one CI runner user (ops#89). The runner talks to this daemon, never to the
+# root one, so a job can't reach root, another runner, or another repo.
+# Instance = user name, e.g. ci-docker@ci-evemos-1.service. Socket: /run/ci-docker-<user>/docker.sock
+# Installed by ci-box.sh prepare. Same settings as Docker's own rootless user unit, as a system unit
+# so root can see and restart it.
+[Unit]
+Description=Rootless Docker for CI user %i
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=notify
+NotifyAccess=all
+User=%i
+Group=%i
+Environment=HOME=/home/%i
+Environment=XDG_RUNTIME_DIR=/run/ci-docker-%i
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+# Each user's Docker gets its own block of published ports (dockerd-ports.sh).
+Environment=CI_DOCKER_USER=%i
+Environment=DOCKERD=/usr/local/lib/ci-box/dockerd-ports.sh
+RuntimeDirectory=ci-docker-%i
+RuntimeDirectoryMode=0700
+# cgroupfs, not Docker's default systemd driver: that one puts containers under the user's own
+# systemd (user.slice/user-<uid>.slice), which these login-less users don't have, so every
+# `docker run` failed (2026-11-16). Containers now stay inside this unit's cgroup, so its
+# CPUWeight/IOWeight (the release priority drop-in) applies to them too.
+ExecStart=/usr/local/bin/dockerd-rootless.sh --exec-opt native.cgroupdriver=cgroupfs
+ExecReload=/bin/kill -s HUP $MAINPID
+TimeoutSec=0
+Restart=always
+RestartSec=2
+Delegate=yes
+KillMode=mixed
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target

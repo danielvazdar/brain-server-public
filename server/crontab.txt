@@ -1,0 +1,3 @@
+*/5 * * * * /home/daniel/brain-monitor.sh
+*/5 * * * * /home/daniel/brain-heartbeat.sh
+30 6 * * * /home/daniel/brain-offsite-backup.sh >> /home/daniel/backups/offsite.log 2>&1

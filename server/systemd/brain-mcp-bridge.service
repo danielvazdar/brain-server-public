@@ -1,0 +1,15 @@
+[Unit]
+Description=Brain MCP Bridge (Streamable HTTP)
+After=network.target brain-mcp.service
+
+[Service]
+Type=simple
+User=daniel
+WorkingDirectory=/home/daniel/brain-server
+Environment=PATH=/home/daniel/brain-server/venv/bin:/usr/bin
+ExecStart=/home/daniel/brain-server/venv/bin/python mcp_bridge.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

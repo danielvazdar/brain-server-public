@@ -1,0 +1,14 @@
+[Unit]
+Description=Brain Server Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=daniel
+ExecStart=/usr/bin/python3 /home/daniel/brain-bot.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=Brain Indexer Service
+After=network.target
+
+[Service]
+Type=simple
+User=daniel
+WorkingDirectory=/home/daniel/brain-server
+Environment=PATH=/home/daniel/brain-server/venv/bin:/usr/bin
+Environment=TRANSFORMERS_OFFLINE=1
+Environment=HF_HUB_OFFLINE=1
+ExecStart=/home/daniel/brain-server/venv/bin/python indexer.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
